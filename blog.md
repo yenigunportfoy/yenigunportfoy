@@ -47,6 +47,7 @@ Stay tuned for upcoming posts on:
 Thanks for reading! Feel free to reach out via [GitHub](https://github.com).
 
 # What do I think here
+
 I created this page to dump by brain to clarify my toughts. I have focused my thinking on a couple of subjects recently:
 1. Global macro view
 2. Turkish local macro outlook
