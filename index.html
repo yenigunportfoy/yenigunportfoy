@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Fira+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0E0F13;
+      --surface:   #15171D;
+      --border:    #23262F;
+      --accent:    #F0C060;
+      --accent2:   #6EE7B7;
+      --muted:     #6B7280;
+      --text:      #E2E4E9;
+      --text-dim:  #9CA3AF;
+      --code-bg:   #1A1D24;
+      --radius:    12px;
+      --font-body: 'Outfit', sans-serif;
+      --font-serif:'Lora', serif;
+      --font-mono: 'Fira Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      padding: 56px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .site-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .site-title span { color: var(--accent); font-style: italic; }
+    .site-meta {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .site-meta strong { color: var(--accent2); }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .toc-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .toc ol { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+    .toc ol li a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .toc ol li a:hover { color: var(--accent); }
+
+    /* ── BLOG CARDS ── */
+    .blog-sections { display: flex; flex-direction: column; gap: 28px; }
+
+    .blog-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s;
+    }
+    .blog-section.visible { opacity: 1; transform: translateY(0); }
+    .blog-section:hover {
+      border-color: rgba(240,192,96,0.25);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    .section-header {
+      padding: 22px 32px;
+      background: linear-gradient(90deg, rgba(240,192,96,0.07) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-index {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: rgba(240,192,96,0.12);
+      border: 1px solid rgba(240,192,96,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .section-body { padding: 28px 32px; }
+
+    /* ── MARKDOWN ELEMENT STYLES ── */
+    .section-body p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+      font-weight: 300;
+      margin-bottom: 16px;
+    }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: var(--text); font-weight: 500; }
+    .section-body em { font-style: italic; color: var(--accent); }
+    .section-body a {
+      color: var(--accent2);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(110,231,183,0.3);
+      transition: border-color 0.2s;
+    }
+    .section-body a:hover { border-color: var(--accent2); }
+    .section-body ul, .section-body ol {
+      padding-left: 22px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--text-dim);
+      font-weight: 300;
+    }
+    .section-body li { font-size: 1rem; line-height: 1.7; }
+    .section-body li strong { color: var(--text); font-weight: 500; }
+    .section-body blockquote {
+      border-left: 3px solid var(--accent2);
+      padding: 12px 20px;
+      margin: 20px 0;
+      background: rgba(110,231,183,0.04);
+      border-radius: 0 8px 8px 0;
+      font-family: var(--font-serif);
+      font-style: italic;
+      color: var(--text-dim);
+    }
+    .section-body pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 20px 0;
+      position: relative;
+    }
+    .section-body pre::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 10px; right: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .section-body code {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: #A5F3BA;
+      line-height: 1.65;
+    }
+    .section-body :not(pre) > code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.83rem;
+      color: var(--accent);
+    }
+    .section-body h2 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 24px 0 10px;
+    }
+    .section-body h3 {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin: 20px 0 8px;
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 100px 0;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+    }
+    .error-box h3 { color: #F87171; margin-bottom: 10px; }
+    .error-box p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-top: 8px; }
+    .error-box code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: rgba(240,192,96,0.1);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      margin-top: 64px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .site-footer p { font-size: 0.78rem; color: var(--muted); }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── SCROLL PROGRESS ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      z-index: 100;
+      width: 0%;
+      transition: width 0.1s;
+    }
+
+    /* ── BACK TO TOP ── */
+    .back-top {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      width: 44px; height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.3s, transform 0.3s, border-color 0.3s;
+      z-index: 99;
+    }
+    .back-top.visible { opacity: 1; transform: translateY(0); }
+    .back-top:hover { border-color: var(--accent); }
+    .back-top svg { color: var(--accent); width: 18px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .section-header { padding: 16px 18px; gap: 10px; }
+      .section-body   { padding: 18px; }
+      .site-header    { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="page-wrap">
+
+  <header class="site-header">
+    <h1 class="site-title">my.<span>blog</span></h1>
+    <span class="site-meta">Source: <strong>blog.md</strong></span>
+  </header>
+
+  <nav class="toc" id="toc" style="display:none">
+    <div class="toc-title">Table of Contents</div>
+    <ol id="toc-list"></ol>
+  </nav>
+
+  <main class="blog-sections" id="blog-container">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading blog.md…</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Reads from <a href="blog.md">blog.md</a> — edit the file to update the blog.</p>
+    <p id="section-count"></p>
+  </footer>
+
+</div>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M18 15l-6-6-6 6"/>
+  </svg>
+</button>
+
+<script>
+/* ── SCROLL EFFECTS ── */
+const progress = document.getElementById('progress');
+const backTop  = document.getElementById('backTop');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  progress.style.width = pct + '%';
+  backTop.classList.toggle('visible', window.scrollY > 300);
+});
+
+/* ── CARD REVEAL OBSERVER ── */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+/* ── MINIMAL MARKDOWN PARSER ──
+   Handles: fenced code blocks, blockquotes, ul, ol,
+   h2, h3, paragraphs, **bold**, *italic*, `code`, [link](url)
+*/
+function parseMarkdown(md) {
+  const lines = md.split('\n');
+  let html = '';
+  let i = 0;
+
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const inline = t => t
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:8px;margin-top:12px">')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Fenced code block
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim() || '';
+      let code = '';
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        code += esc(lines[i]) + '\n';
+        i++;
+      }
+      html += `<pre data-lang="${esc(lang)}"><code>${code.trimEnd()}</code></pre>`;
+      i++; continue;
+    }
+
+    // Blockquote
+    if (line.startsWith('> ')) {
+      let bq = '';
+      while (i < lines.length && lines[i].startsWith('> ')) {
+        bq += inline(lines[i].slice(2)) + ' ';
+        i++;
+      }
+      html += `<blockquote>${bq.trim()}</blockquote>`;
+      continue;
+    }
+
+    // Unordered list
+    if (/^[-*+] /.test(line)) {
+      let items = '';
+      while (i < lines.length && /^[-*+] /.test(lines[i])) {
+        items += `<li>${inline(lines[i].replace(/^[-*+] /, ''))}</li>`;
+        i++;
+      }
+      html += `<ul>${items}</ul>`;
+      continue;
+    }
+
+    // Ordered list
+    if (/^\d+\. /.test(line)) {
+      let items = '';
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        items += `<li>${inline(lines[i].replace(/^\d+\. /, ''))}</li>`;
+        i++;
+      }
+      html += `<ol>${items}</ol>`;
+      continue;
+    }
+
+    // H2 / H3 (sub-headers inside a section)
+    if (line.startsWith('### ')) { html += `<h3>${inline(line.slice(4))}</h3>`; i++; continue; }
+    if (line.startsWith('## '))  { html += `<h2>${inline(line.slice(3))}</h2>`; i++; continue; }
+
+    // Horizontal rule
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
+      html += `<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">`;
+      i++; continue;
+    }
+
+    // Blank line
+    if (line.trim() === '') { i++; continue; }
+
+    // Paragraph — collect consecutive non-special lines
+    let para = '';
+    while (
+      i < lines.length &&
+      lines[i].trim() !== '' &&
+      !lines[i].startsWith('#') &&
+      !lines[i].startsWith('```') &&
+      !lines[i].startsWith('> ') &&
+      !/^[-*+] /.test(lines[i]) &&
+      !/^\d+\. /.test(lines[i]) &&
+      !/^(-{3,}|\*{3,}|_{3,})$/.test(lines[i].trim())
+    ) {
+      para += inline(lines[i]) + ' ';
+      i++;
+    }
+    if (para.trim()) html += `<p>${para.trim()}</p>`;
+  }
+
+  return html;
+}
+
+/* ── SPLIT BY TOP-LEVEL (#) HEADERS ── */
+function splitSections(md) {
+  const lines = md.split('\n');
+  const sections = [];
+  let title = null;
+  let buf = [];
+
+  for (const line of lines) {
+    // Match exactly one # followed by a space (not ## or ###)
+    if (/^# (?!#)/.test(line)) {
+      if (title !== null) sections.push({ title, content: buf.join('\n') });
+      title = line.slice(2).trim();
+      buf = [];
+    } else {
+      if (title !== null) buf.push(line);
+    }
+  }
+  if (title !== null) sections.push({ title, content: buf.join('\n') });
+  return sections;
+}
+
+/* ── RENDER ── */
+function renderBlog(sections) {
+  const container = document.getElementById('blog-container');
+  const toc       = document.getElementById('toc');
+  const tocList   = document.getElementById('toc-list');
+  const countEl   = document.getElementById('section-count');
+
+  container.innerHTML = '';
+  tocList.innerHTML   = '';
+
+  if (!sections.length) {
+    container.innerHTML = `
+      <div class="error-box">
+        <h3>No sections found</h3>
+        <p>Make sure <code>blog.md</code> has at least one top-level header like <code># My Title</code>.</p>
+      </div>`;
+    return;
+  }
+
+  toc.style.display = 'block';
+  countEl.textContent = `${sections.length} section${sections.length !== 1 ? 's' : ''}`;
+
+  sections.forEach((sec, idx) => {
+    const id = `section-${idx}`;
+
+    // TOC
+    const li = document.createElement('li');
+    const a  = document.createElement('a');
+    a.href = `#${id}`;
+    a.textContent = sec.title;
+    li.appendChild(a);
+    tocList.appendChild(li);
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'blog-section';
+    card.id = id;
+    card.innerHTML = `
+      <div class="section-header">
+        <span class="section-index">#${String(idx + 1).padStart(2, '0')}</span>
+        <h2 class="section-title">${sec.title}</h2>
+      </div>
+      <div class="section-body">${parseMarkdown(sec.content)}</div>
+    `;
+    container.appendChild(card);
+    revealObserver.observe(card);
+  });
+}
+
+/* ── FETCH blog.md ── */
+async function loadBlog() {
+  const container = document.getElementById('blog-container');
+  try {
+    const res = await fetch('blog.md');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    renderBlog(splitSections(text));
+  } catch (err) {
+    container.innerHTML = `
+      <div class="error-box">
+        <h3>Could not load blog.md</h3>
+        <p>${err.message}</p>
+        <p>Make sure <code>blog.md</code> sits in the same folder as <code>index.html</code>.<br>
+        On GitHub Pages both files must be committed to the same directory.</p>
+      </div>`;
+  }
+}
+
+loadBlog();
+</script>
+</body>
+</html>
