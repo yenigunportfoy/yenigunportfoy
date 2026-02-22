@@ -53,4 +53,3 @@ I created this page to dump by brain to clarify my toughts. I have focused my th
 3. what kind of quantitative structure I may put in place to make a clear model of what is going on...
 4. I also create a technical perspective for trading signal generation
 
-![GOLD](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC4q2rqdklCiedhuP9JcO0Qn5pGxclp4-VIA&s"I will shortly write about my view on gold market")
