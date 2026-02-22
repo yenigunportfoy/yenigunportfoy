@@ -45,3 +45,13 @@ Stay tuned for upcoming posts on:
 - Personal productivity systems
 
 Thanks for reading! Feel free to reach out via [GitHub](https://github.com).
+
+# What do I think here
+I created this page to dump by brain to clarify my toughts. I have focused my thinking on a couple of subjects recently:
+1. Global macro view
+2. Turkish local macro outlook
+3. what kind of quantitative structure I may put in place to make a clear model of what is going on...
+4. I also create a technical perspective for trading signal generation
+
+![GOLD](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC4q2rqdklCiedhuP9JcO0Qn5pGxclp4-VIA&s"I will shortly write about my view on gold market")
+https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC4q2rqdklCiedhuP9JcO0Qn5pGxclp4-VIA&s
